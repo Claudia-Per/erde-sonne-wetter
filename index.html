@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>Erde, Sonne, Wetter – Vergleich</title>
+<style>
+:root{--bg:#EEF2F3;--surface:#fff;--ink:#16232C;--muted:#53636D;--line:#C9D3D7;--jet:#0E7C86;--cold:#5B3E9C;--warm:#B8452B;--sun:#B7791F;
+  --ok:#2F7A4B;--ok-soft:#D8EDDF;--est:#9A6A10;--est-soft:#F5E7C6;--open:#56606A;--open-soft:#E2E6E9;color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--bg:#0F171C;--surface:#172229;--ink:#E4ECEF;--muted:#9AAAB2;--line:#2C3B44;--jet:#4CC4CD;--cold:#A88BE8;--warm:#EF8466;--sun:#E5B45A;
+  --ok:#7CCB97;--ok-soft:#1D3528;--est:#E2B354;--est-soft:#3A2F17;--open:#A9B3BA;--open-soft:#273138;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 -apple-system,"Helvetica Neue",Arial,sans-serif;padding:20px max(16px,2vw) 48px}
+.wrap{max-width:1400px;margin:0 auto;display:grid;gap:22px}
+header{display:flex;flex-wrap:wrap;gap:8px 20px;align-items:baseline;justify-content:space-between}
+h1{margin:0;font-size:1.7rem} h2{margin:0;font-size:1.15rem} h3{margin:0;font-size:1rem}
+p{margin:0}
+.lead{color:var(--muted);max-width:75ch}
+.stand{color:var(--muted);font-size:.9rem}
+button{font:inherit;border:1px solid var(--ink);background:var(--ink);color:var(--bg);border-radius:6px;padding:6px 12px;cursor:pointer}
+a{color:var(--jet);font-weight:600}
+.btn-link{display:inline-block;justify-self:start;border:1px solid var(--jet);border-radius:6px;padding:8px 14px;text-decoration:none}
+.btn-link:hover{background:var(--jet);color:var(--surface)}
+.k{font:600 .72rem/1 ui-monospace,Menlo,monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.tag{display:inline-block;font:600 .68rem/1 ui-monospace,Menlo,monospace;letter-spacing:.05em;text-transform:uppercase;padding:5px 8px;border-radius:4px;white-space:nowrap}
+.strong{background:var(--ok-soft);color:var(--ok)} .weak{background:var(--est-soft);color:var(--est)} .none{background:var(--open-soft);color:var(--open)}
+.legend{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:.9rem;color:var(--muted);align-items:center}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;display:grid;gap:10px;min-width:0;align-content:start}
+.diagram svg{width:100%;height:auto;display:block}
+.row-title{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap;margin-top:6px}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:start}
+@media (max-width:1050px){.grid{grid-template-columns:1fr}}
+img,canvas{display:block;width:100%;height:auto;border:1px solid var(--line);border-radius:6px;background:#fff}
+.cap{font-size:.82rem;color:var(--muted)}
+ul.facts{margin:0;padding-left:18px;display:grid;gap:6px;font-size:.9rem}
+.err{font-size:.85rem;color:var(--warm)}
+table{width:100%;border-collapse:collapse;font-size:.88rem}
+td{padding:5px 4px;border-bottom:1px solid var(--line);vertical-align:top}
+td.m{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.big{font-size:1.6rem;font-weight:700;font-variant-numeric:tabular-nums}
+.tl{display:grid;gap:8px;font-size:.9rem}
+.tl div{display:grid;grid-template-columns:62px 1fr;gap:10px}
+.tl b{font-variant-numeric:tabular-nums}
+footer{font-size:.82rem;color:var(--muted);border-top:1px solid var(--line);padding-top:12px;display:grid;gap:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div style="display:grid;gap:6px">
+    <h1>Erde, Sonne, Wetter – was hängt zusammen?</h1>
+    <p class="lead">Polarwirbel, Jetstream und Wetterkarte neben Sonne, Vulkanen und Erdbeben. Die Daten von NOAA und USGS laden live und erneuern sich alle 15 Minuten. Jeder Bereich trägt ein Etikett, wie stark sein Zusammenhang mit dem Wetter belegt ist.</p>
+  </div>
+  <span class="stand">Geladen: <span id="stand">…</span> · <button id="now" type="button">Jetzt erneuern</button></span>
+</header>
+
+<div class="legend">
+  <span><span class="tag strong">starker Zusammenhang</span> gut belegt</span>
+  <span><span class="tag weak">schwach, umstritten</span> Spuren über Monate bis Jahre, Forschung uneinig</span>
+  <span><span class="tag none">kein Zusammenhang bekannt</span></span>
+</div>
+
+<section class="box diagram" aria-label="Übersicht der Zusammenhänge">
+  <svg viewBox="0 0 1000 250" role="img" aria-label="Schema: Sonne und grosse Vulkanausbrüche wirken schwach auf den Polarwirbel, der Polarwirbel stark auf Jetstream und Wetterkarte, Erdbeben ohne Verbindung">
+    <defs>
+      <marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="var(--ok)"/></marker>
+      <marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="var(--est)"/></marker>
+    </defs>
+    <g font-family="-apple-system,Helvetica,Arial,sans-serif" font-size="16" font-weight="700" text-anchor="middle">
+      <rect x="30" y="20" width="170" height="54" rx="8" fill="var(--surface)" stroke="var(--sun)" stroke-width="2"/><text x="115" y="53" fill="var(--ink)">Sonne</text>
+      <rect x="30" y="100" width="170" height="54" rx="8" fill="var(--surface)" stroke="var(--warm)" stroke-width="2"/><text x="115" y="125" fill="var(--ink)">Grosse Vulkan-</text><text x="115" y="144" fill="var(--ink)">ausbrüche</text>
+      <rect x="30" y="180" width="170" height="54" rx="8" fill="var(--surface)" stroke="var(--line)" stroke-width="2" stroke-dasharray="5 4"/><text x="115" y="213" fill="var(--muted)">Erdbeben</text>
+      <rect x="330" y="60" width="180" height="60" rx="8" fill="var(--surface)" stroke="var(--cold)" stroke-width="2.5"/><text x="420" y="87" fill="var(--ink)">Polarwirbel</text><text x="420" y="106" font-size="12" font-weight="400" fill="var(--muted)">Stratosphäre + 500 hPa</text>
+      <rect x="590" y="60" width="160" height="60" rx="8" fill="var(--surface)" stroke="var(--jet)" stroke-width="2.5"/><text x="670" y="96" fill="var(--ink)">Jetstream</text>
+      <rect x="820" y="60" width="160" height="60" rx="8" fill="var(--surface)" stroke="var(--ink)" stroke-width="2.5"/><text x="900" y="87" fill="var(--ink)">Wetterkarte</text><text x="900" y="106" font-size="12" font-weight="400" fill="var(--muted)">Hoch, Tief, Kälte</text>
+    </g>
+    <path d="M200,47 C260,47 280,80 328,84" fill="none" stroke="var(--est)" stroke-width="2.5" stroke-dasharray="7 5" marker-end="url(#a2)"/>
+    <path d="M200,127 C260,127 280,100 328,98" fill="none" stroke="var(--est)" stroke-width="2.5" stroke-dasharray="7 5" marker-end="url(#a2)"/>
+    <line x1="510" y1="90" x2="586" y2="90" stroke="var(--ok)" stroke-width="4" marker-end="url(#a1)"/>
+    <line x1="750" y1="90" x2="816" y2="90" stroke="var(--ok)" stroke-width="4" marker-end="url(#a1)"/>
+    <g font-family="ui-monospace,Menlo,monospace" font-size="11.5">
+      <text x="262" y="34" fill="var(--est)">schwach, umstritten</text>
+      <text x="262" y="152" fill="var(--est)">nur sehr grosse</text>
+      <text x="548" y="80" text-anchor="middle" fill="var(--ok)">stark</text>
+      <text x="783" y="80" text-anchor="middle" fill="var(--ok)">stark</text>
+      <text x="215" y="212" fill="var(--muted)">✕ keine bekannte Verbindung zum Wetter</text>
+    </g>
+  </svg>
+</section>
+
+<div class="row-title"><h2>Das Wetter-System</h2><span class="tag strong">starker Zusammenhang</span></div>
+<div class="grid">
+  <section class="box">
+    <span class="k">Polarwirbel</span><h3>Arktische Oszillation (AO), letzte Monate</h3>
+    <img id="ao" alt="Diagramm des täglichen AO-Index von NOAA CPC">
+    <p class="cap">Die AO ist eine Messzahl für den Polarwirbel. Positiv: kräftiger, gut zentrierter Wirbel, eher milde Westlagen. Negativ: schwacher, zerzauster Wirbel, mehr Kaltluftausbrüche. Quelle: NOAA Climate Prediction Center; Deutung nach Flämingwetter.</p>
+  </section>
+  <section class="box">
+    <span class="k">Jetstream</span><h3>Polarjet über Europa, 300 hPa</h3>
+    <p>Das Windband in rund 9 km Höhe. Farbe zeigt die Windgeschwindigkeit. Achte darauf, wo es über Europa liegt: Direkt über uns ziehen Tiefs und Stürme durch, grosse Wellen nach Süden bringen Kaltluft.</p>
+    <a class="btn-link" href="https://www.wetteronline.de/?pcid=pc_modell_expert&gid=euro&iid=ifs_euro&parameter=jet3&model=ifs" target="_blank" rel="noopener">Aktuelle Jetstream-Karte öffnen (WetterOnline)</a>
+    <p class="cap">Polarwirbel von oben: <a href="http://flaeming-wetter.bplaced.net/Synoptik/Polarwirbel-Troposphaere.html" target="_blank" rel="noopener">aktuelle 500-hPa-Karte bei Flämingwetter</a>.</p>
+  </section>
+  <section class="box">
+    <span class="k">Wetterkarte</span><h3>Bodendruck Europa</h3>
+    <p>Hoch- und Tiefdruckgebiete am Boden mit Isobaren (Linien gleichen Luftdrucks). Ein Hoch über dem Nordatlantik oder Skandinavien kann die milde Westströmung sperren.</p>
+    <a class="btn-link" href="https://www.wetteronline.de/?pcid=pc_modell_expert&gid=euro&iid=ifs_euro&parameter=pslv&model=ifs" target="_blank" rel="noopener">Aktuelle Bodendruck-Karte öffnen (WetterOnline)</a>
+  </section>
+</div>
+
+<div class="row-title"><h2>Mögliche Einflüsse von aussen</h2></div>
+<div class="grid">
+  <section class="box">
+    <span class="k">Sonne</span><span class="tag weak">schwach, umstritten</span>
+    <h3>Sonnenflecken seit 1985</h3>
+    <canvas id="ssn" width="640" height="300" aria-label="Monatliche Sonnenfleckenzahl seit 1985 mit markierten Ereignissen"></canvas>
+    <p class="cap">Monatliche Sonnenfleckenzahl (NOAA SWPC). Markiert: Ereignisse aus Polarwirbel und Vulkanen zum Vergleich.</p>
+    <div style="display:flex;gap:16px;align-items:baseline;flex-wrap:wrap"><span class="big" id="ssnNow">–</span><span class="cap" id="ssnNowCap">Sonnenflecken im letzten Monat</span></div>
+    <h3>Sonnensturm-Stärke, letzte 7 Tage</h3>
+    <canvas id="kp" width="640" height="160" aria-label="Kp-Index der letzten 7 Tage"></canvas>
+    <p class="cap">Kp-Index alle 3 Stunden (0 ruhig, ab 5 Sturm). Quelle: NOAA SWPC.</p>
+    <ul class="facts">
+      <li>Modellstudie: Bei schwacher Sonne (wenig UV-Strahlung) werden kalte Winter in Nordeuropa häufiger, ähnlich einer negativen AO. Ineson und andere, Nature Geoscience 2011. <span class="tag weak">schwach, umstritten</span></li>
+      <li>Die Satellitenmessungen dazu reichen nur wenige Jahre zurück. Andere Modelle zeigen das Signal nicht durchgehend. <span class="tag none">offen</span></li>
+      <li>Sonnenstürme (Kp) und Polarlichter: keine belegte Wirkung auf unser Wetter. <span class="tag none">kein Zusammenhang bekannt</span></li>
+    </ul>
+  </section>
+
+  <section class="box">
+    <span class="k">Vulkane</span><span class="tag weak">nur sehr grosse Ausbrüche</span>
+    <h3>Wann ein Ausbruch das Wetter berührt</h3>
+    <ul class="facts">
+      <li>Nur explosive Ausbrüche, die viel Schwefel bis in die Stratosphäre schleudern, wirken auf das Klima. Die Schwefeltröpfchen kühlen den Boden ein bis zwei Jahre leicht ab.</li>
+      <li>In den Wintern danach war der Polarwirbel oft stärker (positive AO), in Europa eher mild. Am besten untersucht: Pinatubo 1991. Stenchikov, Robock und andere 2002; Robock 2000. <span class="tag weak">belegt, Stärke umstritten</span></li>
+      <li>Neuere Studien: Der Effekt ist oft kleiner als die natürlichen Schwankungen von Winter zu Winter. <span class="tag none">offen</span></li>
+      <li>Die vielen kleineren Ausbrüche jede Woche wirken nicht messbar auf das Wetter. <span class="tag weak">Einschätzung</span></li>
+    </ul>
+    <h3>Grosse Ausbrüche zum Vergleich</h3>
+    <div class="tl">
+      <div><b>1815</b><span>Tambora (Indonesien): danach das „Jahr ohne Sommer“ 1816 in Europa</span></div>
+      <div><b>1982</b><span>El Chichón (Mexiko)</span></div>
+      <div><b>1991</b><span>Pinatubo (Philippinen): Winter 1991/92 und 1992/93 mit kräftigem Polarwirbel</span></div>
+      <div><b>2022</b><span>Hunga Tonga (Tonga): viel Wasserdampf statt Schwefel, Wirkung noch offen <span class="tag none">offen</span></span></div>
+    </div>
+    <p class="cap">Aktuelle Ausbrüche: <a href="https://volcano.si.edu/reports_weekly.cfm" target="_blank" rel="noopener">Wochenbericht des Smithsonian-Vulkanprogramms</a> (lässt sich hier nicht live einbinden).</p>
+  </section>
+
+  <section class="box">
+    <span class="k">Erdbeben</span><span class="tag none">kein Zusammenhang bekannt</span>
+    <h3>Erdbeben ab Stärke 5, letzte 7 Tage</h3>
+    <div style="display:flex;gap:12px;align-items:baseline"><span class="big" id="eqCount">–</span><span class="cap">Beben weltweit (USGS)</span></div>
+    <table id="eqTable"><tbody><tr><td class="cap">Lädt …</td></tr></tbody></table>
+    <p class="err" id="eqerr" hidden>Die Erdbebendaten lassen sich gerade nicht laden. <a href="https://earthquake.usgs.gov/earthquakes/map/" target="_blank" rel="noopener">Karte beim USGS öffnen</a>.</p>
+    <ul class="facts">
+      <li>Es gibt kein „Erdbebenwetter“: Beben verteilen sich etwa gleich auf kaltes, heisses und regnerisches Wetter. Sie entstehen in Tiefen, die das Wetter nicht erreicht. USGS. <span class="tag strong">belegt</span></li>
+      <li>Sehr starke Tiefdruckgebiete können langsames Gleiten an Verwerfungen auslösen. Die Zahlen sind klein und statistisch nicht bedeutsam. USGS. <span class="tag none">offen</span></li>
+      <li>Sonnenstürme lösen keine Erdbeben aus, ein Zusammenhang wurde nie nachgewiesen. USGS. <span class="tag strong">belegt</span></li>
+    </ul>
+  </section>
+</div>
+
+<footer>
+  <p>Quellen: NOAA Climate Prediction Center (AO-Index), WetterOnline Profikarten (verlinkt), NOAA Space Weather Prediction Center (Sonnenflecken, Kp-Index), USGS Earthquake Hazards Program (Erdbeben, FAQ „Is there earthquake weather?“), Smithsonian Global Volcanism Program, Flämingwetter. Forschung: Ineson u. a. 2011 (Nature Geoscience 4, 753–757); Stenchikov, Robock u. a. 2002 (Journal of Geophysical Research); Robock 2000 (Reviews of Geophysics).</p>
+  <p>Hinweis: Die Forschungsaussagen stammen aus einer Websuche vom 14.11.2026 (Zusammenfassungen und Kurzfassungen, nicht die ganzen Studien). Nebeneinander heisst nicht verbunden: Gleichzeitige Ausschläge in zwei Spalten sind meistens Zufall. Keine Wettervorhersage.</p>
+  <p>Zusammenstellung und Verantwortung: Claudia Per. Recherche, Texte und Programmierung mit Unterstützung von KI (Claude). Stand der Texte: 14.11.2026.</p>
+</footer>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const pad = n => String(n).padStart(2,'0');
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+// WetterOnline: neuester verfügbarer Modelllauf
+const code = d => pad(d.getUTCFullYear()%100)+pad(d.getUTCMonth()+1)+pad(d.getUTCDate())+pad(d.getUTCHours());
+const day = d => d.getUTCFullYear()+'/'+pad(d.getUTCMonth()+1)+'/'+pad(d.getUTCDate());
+function woUrl(p, run){ const v=new Date(run.getTime()+6*3600e3);
+  return 'https://www.wetteronline.de/?pid=p_modell_expert&ireq=true&src=modellplot/vermarktung/wom/modell/ifs/0p1/ifs0p1womkarten/'+day(run)+'/'+pad(run.getUTCHours())+'/ifs_euro/'+p+'/'+p+'_'+code(v)+'_'+code(run)+'.gif'; }
+function loadWO(){
+  const n=new Date(); const base=new Date(Date.UTC(n.getUTCFullYear(),n.getUTCMonth(),n.getUTCDate(),Math.floor(n.getUTCHours()/6)*6));
+  const runs=[0,1,2,3,4].map(i=>new Date(base.getTime()-i*6*3600e3));
+  const t=i=>{ if(i>=runs.length){$('woerr').hidden=false;return;}
+    const im=new Image(); im.referrerPolicy='no-referrer';
+    im.onload=()=>{ $('jet').src=woUrl('jet3',runs[i]); $('druck').src=woUrl('pslv',runs[i]); $('woerr').hidden=true;
+      const v=new Date(runs[i].getTime()+6*3600e3);
+      $('jetcap').textContent='Farbe = Windgeschwindigkeit in rund 9 km Höhe. Karte für '+v.toLocaleString('de-CH',{weekday:'short',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+' Uhr. Quelle: WetterOnline, Modell IFS (ECMWF).'; };
+    im.onerror=()=>t(i+1); im.src=woUrl('jet3',runs[i]); };
+  t(0);
+}
+
+// Sonnenflecken
+const EVENTS=[[1991.45,'Pinatubo','warm',0],[2012.0,'mild 2011/12','jet',1],[2018.13,'Kälte Feb. 2018','cold',0],[2022.04,'Hunga Tonga','warm',2]];
+async function loadSSN(){
+  try{
+    const d=await (await fetch('https://services.swpc.noaa.gov/json/solar-cycle/observed-solar-cycle-indices.json',{cache:'no-store'})).json();
+    const pts=d.map(r=>{const [y,m]=r['time-tag'].split('-').map(Number);return [y+(m-0.5)/12, r.ssn];}).filter(p=>p[0]>=1985 && p[1]>=0);
+    const c=$('ssn'), g=c.getContext('2d'), W=c.width, H=c.height, L=40, R=10, T=50, B=28;
+    g.clearRect(0,0,W,H); g.fillStyle='#ffffff'; g.fillRect(0,0,W,H);
+    const x0=1985, x1=pts[pts.length-1][0]+0.5, ymax=300;
+    const X=x=>L+(x-x0)/(x1-x0)*(W-L-R), Y=y=>H-B-(Math.min(y,ymax)/ymax)*(H-T-B);
+    g.strokeStyle='#E1E7EA'; g.fillStyle='#53636D'; g.font='11px -apple-system,Arial'; g.lineWidth=1;
+    [0,100,200,300].forEach(v=>{g.beginPath();g.moveTo(L,Y(v));g.lineTo(W-R,Y(v));g.stroke();g.fillText(v,6,Y(v)+4);});
+    for(let yr=1990;yr<=x1;yr+=5){g.fillText(yr,X(yr)-14,H-8);}
+    g.strokeStyle='#B7791F'; g.lineWidth=1.4; g.beginPath(); pts.forEach((p,i)=>i?g.lineTo(X(p[0]),Y(p[1])):g.moveTo(X(p[0]),Y(p[1]))); g.stroke();
+    const col={warm:'#B8452B',cold:'#5B3E9C',jet:'#0E7C86'};
+    EVENTS.forEach(([x,l,k,row])=>{g.strokeStyle=col[k];g.setLineDash([4,3]);g.beginPath();g.moveTo(X(x),T-6);g.lineTo(X(x),H-B);g.stroke();g.setLineDash([]);
+      g.fillStyle=col[k]; g.font='bold 11px -apple-system,Arial'; const w=g.measureText(l).width; let tx=X(x)+4; if(tx+w>W-R) tx=X(x)-w-4; g.fillText(l,tx,14+row*14);});
+    const last=d[d.length-1]; $('ssnNow').textContent=Math.round(last.ssn);
+    $('ssnNowCap').textContent='Sonnenflecken im Monat '+last['time-tag']+' (Höhepunkt des aktuellen Zyklus lag um 2024/25)';
+  }catch(e){ $('ssnNowCap').textContent='Sonnendaten gerade nicht erreichbar.'; }
+}
+async function loadKp(){
+  try{
+    const d=await (await fetch('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json',{cache:'no-store'})).json();
+    const rows=(Array.isArray(d[0])? d.slice(1).map(r=>({t:r[0],k:+r[1]})) : d.map(r=>({t:r.time_tag,k:+r.Kp}))).slice(-56);
+    const c=$('kp'), g=c.getContext('2d'), W=c.width, H=c.height, L=24, B=22, T=8;
+    g.fillStyle='#ffffff'; g.fillRect(0,0,W,H);
+    const bw=(W-L-6)/rows.length;
+    g.fillStyle='#53636D'; g.font='11px -apple-system,Arial'; [0,5,9].forEach(v=>g.fillText(v,6,H-B-(v/9)*(H-T-B)+4));
+    g.strokeStyle='#E1E7EA'; g.beginPath(); const y5=H-B-(5/9)*(H-T-B); g.moveTo(L,y5); g.lineTo(W,y5); g.stroke();
+    rows.forEach((r,i)=>{const h=(r.k/9)*(H-T-B); g.fillStyle=r.k>=5?'#B8452B':(r.k>=4?'#B7791F':'#0E7C86'); g.fillRect(L+i*bw+1,H-B-h,Math.max(1,bw-2),h);
+      if(r.t.slice(11,13)==='00'){g.fillStyle='#53636D'; g.fillText(r.t.slice(8,10)+'.'+r.t.slice(5,7)+'.',L+i*bw,H-6);} });
+  }catch(e){}
+}
+async function loadEQ(){
+  try{
+    const d=await (await fetch('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_week.geojson',{cache:'no-store'})).json();
+    const f=d.features.filter(x=>x.properties.mag>=5).sort((a,b)=>b.properties.mag-a.properties.mag);
+    $('eqCount').textContent=f.length;
+    const tb=$('eqTable').tBodies[0]; tb.innerHTML='';
+    f.slice(0,8).forEach(x=>{const tr=document.createElement('tr'); const p=x.properties;
+      const td1=document.createElement('td'); td1.className='m'; td1.textContent='M '+p.mag.toFixed(1);
+      const td2=document.createElement('td'); td2.textContent=p.place||'–';
+      const td3=document.createElement('td'); td3.className='cap'; td3.textContent=new Date(p.time).toLocaleDateString('de-CH',{day:'2-digit',month:'2-digit'});
+      tr.append(td1,td2,td3); tb.appendChild(tr);});
+    if(!f.length) tb.innerHTML='<tr><td class="cap">Keine Beben ab Stärke 5 in den letzten 7 Tagen.</td></tr>';
+    $('eqerr').hidden=true;
+  }catch(e){ $('eqerr').hidden=false; }
+}
+function refresh(){
+  $('ao').src='https://www.cpc.ncep.noaa.gov/products/precip/CWlink/daily_ao_index/ao.obs.gif?t='+Date.now();
+  loadSSN(); loadKp(); loadEQ();
+  $('stand').textContent=new Date().toLocaleString('de-CH',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})+' Uhr';
+}
+refresh(); setInterval(refresh,15*60*1000); $('now').addEventListener('click',refresh);
+</script>
+</body>
+</html>
